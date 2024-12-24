@@ -17,6 +17,11 @@ public class WebApplication {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
+    /**
+     * The code provides a mechanism to stop the Spring Boot application gracefully based on a specific command-line argument.
+     * The idea is that if you run the application with the "stop" argument (e.g., java -jar your-app.jar stop),
+     * the application will shut down cleanly without needing to kill the process manually.
+     * **/
     private static ApplicationContext applicationContext = null;
 
     public static void main(String[] args) throws IOException {
