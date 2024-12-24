@@ -1,74 +1,134 @@
 package com.e_commerce_creator.web.config.security;
 
-import com.e_commerce_creator.common.model.user.User;
-import com.e_commerce_creator.common.repository.user.TokenRepository;
-import com.e_commerce_creator.web.service.user.UserService;
+import com.e_commerce_creator.common.enums.response.ResponseCode;
+import com.e_commerce_creator.common.exception.ECCException;
+import com.e_commerce_creator.common.model.users.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.stereotype.Service;
+import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class AuthenticationFilter extends OncePerRequestFilter {
-    final TokenService tokenService;
-    final UserService userService;
-    final TokenRepository tokenRepository;
+public class AuthenticationFilter extends GenericFilterBean {
 
+    //Lazily injecting beans
+    final ObjectProvider<AuthenticationManager> authenticationManagerProvider;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        //any issue on spring security start to debug from AuthenticationFilter.doFilterInternal
-        //prepare the Bearer token that are sent with request on authorization http header
-        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        final String token;
-        final String username;
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        log.info("LOG: AuthenticationFilter doFilter Start.");
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-            //extract the username from Jwt token JwtService;
-            try {
-                username = tokenService.extractUsername(token);
-            } catch (Exception e) {
-                log.error("Invalid Token");
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                return;
+        Optional<String> token = Optional.ofNullable(httpRequest.getHeader("X-Auth-Token"));
+
+        try {
+            if (token.isPresent() && !((String) token.get()).isEmpty()) {
+                processTokenAuthentication(token);
             }
-            //check if the user is not authenticated yet to continue the JWT validation process
-            //if user is already authenticate then we not need to go through the JWT validation Process
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                //we need to get the user from database
-                User user = (User) userService.loadUserByUsername(username);
-                //we need to check if the token is valid also on database side
-                boolean isTokenValid = tokenRepository.findByToken(token)
-                        .map(validToken -> !validToken.isExpired() && !validToken.isRevoked())
-                        .orElse(false);
-                //next step is to validate and check the token is still valid or not + check also on database side
-                if (tokenService.isTokenValid(token, user) && isTokenValid) {
-                    // Update Security Context Holder to set Authentication true
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                    //I want to give some more details about the http request
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    //final step is to update the security context holder
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                }
+
+            log.info("LOG: AuthenticationFilter doFilter END.");
+            chain.doFilter(request, response);
+        } catch (InternalAuthenticationServiceException internalAuthenticationServiceException) {
+            log.info("LOG: AuthenticationFilter internalAuthenticationServiceException.");
+            SecurityContextHolder.clearContext();
+            httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (AuthenticationException authenticationException) {
+            log.info("LOG: AuthenticationFilter authenticationException.");
+            SecurityContextHolder.clearContext();
+            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, authenticationException.getMessage());
+        }
+    }
+
+    public void processTokenAuthentication(Optional<String> token) {
+        log.info("LOG: AuthenticationFilter processTokenAuthentication START.");
+        AuthenticationManager authenticationManager = authenticationManagerProvider.getObject();
+        PreAuthenticatedAuthenticationToken requestAuthentication = new PreAuthenticatedAuthenticationToken(token, null);
+        Authentication responseAuthentication = authenticationManager.authenticate(requestAuthentication);
+        if (responseAuthentication == null || !responseAuthentication.isAuthenticated()) {
+            throw new InternalAuthenticationServiceException("Unable to authenticate Domain User for provided credentials");
+        }
+        log.info("LOG: AuthenticationFilter processTokenAuthentication END.");
+        SecurityContextHolder.getContext().setAuthentication(responseAuthentication);
+    }
+
+    public static class AuthenticationWithToken extends PreAuthenticatedAuthenticationToken {
+
+        public AuthenticationWithToken(Object aPrincipal, Object aCredentials, Collection<? extends GrantedAuthority> anAuthorities) {
+            super(aPrincipal, aCredentials, anAuthorities);
+        }
+
+        public void setToken(String token) {
+            setDetails(token);
+        }
+    }
+
+    //token Authentication Provider
+    @Slf4j
+    @Service
+    public static class TokenAuthenticationProvider implements AuthenticationProvider {
+
+        @Autowired
+        TokenService tokenService;
+
+        @SneakyThrows
+        @Override
+        public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+            log.info("LOG: TokenAuthenticationProvider authenticate START.");
+            Optional token = (Optional) authentication.getPrincipal();
+            if (!token.isPresent()) throw new BadCredentialsException("Invalid token");
+
+            Authentication tokenAuthentication = getAuthentication((String) token.get());
+            log.info("LOG: TokenAuthenticationProvider authenticate END.");
+            if (tokenAuthentication == null) throw new BadCredentialsException("Invalid token or token expired");
+            return tokenAuthentication;
+        }
+
+        public Authentication getAuthentication(String token) throws ECCException {
+            try {
+                log.info("LOG: TokenAuthenticationProvider getAuthentication START.");
+                User account = tokenService.get(token);
+                if (account == null) throw new ECCException("Invalid User", ResponseCode.INVALID_AUTH);
+                AuthenticationFilter.AuthenticationWithToken resultOfAuthentication = new AuthenticationFilter.AuthenticationWithToken(account.getUsername(), null,
+                        AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_DOMAIN_USER"));
+                resultOfAuthentication.setToken(token);
+                log.info("LOG: TokenAuthenticationProvider getAuthentication END.");
+                return resultOfAuthentication;
+            } catch (Exception e) {
+                throw new ECCException(e.getMessage(), ResponseCode.INTERNAL_SERVER_ERROR);
             }
         }
-        //don't forget always to pass to next filter to be executed
-        filterChain.doFilter(request, response);
 
+        @Override
+        public boolean supports(Class<?> authentication) {
+            return authentication.equals(PreAuthenticatedAuthenticationToken.class);
+        }
     }
 
 }

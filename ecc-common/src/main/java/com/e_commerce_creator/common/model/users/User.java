@@ -1,14 +1,12 @@
-package com.e_commerce_creator.common.model.user;
+package com.e_commerce_creator.common.model.users;
 
 import com.e_commerce_creator.common.enums.user.Role;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 
 @Entity(name = "User")
 @Getter
@@ -28,10 +26,6 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     Role role;
-
-    @OneToMany(mappedBy = "user")
-    @JsonManagedReference(value = "user_tokens")
-    List<Token> tokens;
 
 
     @Override
