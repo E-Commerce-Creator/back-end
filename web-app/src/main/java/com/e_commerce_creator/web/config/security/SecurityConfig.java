@@ -38,8 +38,8 @@ public class SecurityConfig {
         //do the configuration
         return httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                                .requestMatchers("api/v1/auth/**").permitAll()
-                                .requestMatchers("api/v1/owner").hasAnyRole(ADMIN.name(), OWNER.name())
+                                .requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers("/api/v1/user/**").hasAnyRole(USER.name(), ADMIN.name())
 //                                .requestMatchers(HttpMethod.GET, "api/v1/owner").hasAnyAuthority(Permission.ADMIN_READ.name(), Permission.OWNER_READ.name())
 //                                .requestMatchers(HttpMethod.POST, "api/v1/owner").hasAnyAuthority(Permission.ADMIN_CREATE.name(), Permission.OWNER_CREATE.name())
 //                                .requestMatchers(HttpMethod.PUT, "api/v1/owner").hasAnyAuthority(Permission.ADMIN_UPDATE.name(), Permission.OWNER_UPDATE.name())
@@ -48,7 +48,7 @@ public class SecurityConfig {
                                 .authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(tokenAuthenticationProvider())
+//                .authenticationProvider(tokenAuthenticationProvider())
                 .cors(cors -> cors.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -66,22 +66,6 @@ public class SecurityConfig {
                     logout.logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext());
                 })
                 .build();
-    }
-
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationProvider tokenAuthenticationProvider() {
-        return new AuthenticationFilter.TokenAuthenticationProvider();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) {
-        return httpSecurity.getSharedObject(AuthenticationManager.class);
     }
 }
 

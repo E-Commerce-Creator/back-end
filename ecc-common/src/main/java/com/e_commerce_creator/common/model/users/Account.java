@@ -4,17 +4,18 @@ import com.e_commerce_creator.common.enums.user.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-@Entity(name = "User")
+@Entity(name = "Account")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements UserDetails {
+public class Account implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;

@@ -27,15 +27,12 @@ public class AuthenticationController {
 
 
     @PostMapping(value = "/register")
-    public ResponseEntity<AppResponse<JsonNode>> register(@RequestBody RegisterRequest request) {
-        AppResponse.ResponseBuilder<JsonNode> responseBuilder = AppResponse.builder();
+    public ResponseEntity<AppResponse<String>> register(@RequestBody RegisterRequest request) {
+        AppResponse.ResponseBuilder<String> responseBuilder = AppResponse.builder();
         try {
-            String token = authenticationService.register(request);
-            ObjectMapper mapper = new ObjectMapper();
-
-            ObjectNode objectNode = mapper.createObjectNode();
-            objectNode.put("token", token);
-            responseBuilder.data(SystemUtil.convertStringToJsonNode(objectNode));
+            responseBuilder.data(
+                    authenticationService.register(request)
+            );
             responseBuilder.status(ResponseCode.SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();

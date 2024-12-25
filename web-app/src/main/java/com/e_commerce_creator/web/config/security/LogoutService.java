@@ -15,7 +15,11 @@ public class LogoutService implements LogoutHandler {
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
-        final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        //1- we want to invalidate the token, so we need to extract the token from request right there
+        //2- we need to fetch this request in database and invalidated
+        //3- then the JwtAuthenticationFilter will do the job since we update our mechanism or our implementation there
+
+        final String header = request.getHeader("X-Auth-Token");
         final String jwt;
 
         if (header != null && header.startsWith("Bearer ")) {

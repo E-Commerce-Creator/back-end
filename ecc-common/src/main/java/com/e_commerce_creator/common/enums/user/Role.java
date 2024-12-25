@@ -2,6 +2,7 @@ package com.e_commerce_creator.common.enums.user;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -42,8 +43,10 @@ public enum Role {
         return permissions;
     }
 
-    public List<SimpleGrantedAuthority> getAuthorities() {
-        List<SimpleGrantedAuthority> authorities = getPermissions().stream().map(permission -> new SimpleGrantedAuthority(permission.getOperation())).collect(Collectors.toList());
+    public Collection<SimpleGrantedAuthority> getAuthorities() {
+        List<SimpleGrantedAuthority> authorities = getPermissions().stream()
+                .map(permission -> new SimpleGrantedAuthority(permission.getOperation()))
+                .collect(Collectors.toList());
         authorities.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
         return authorities;
     }

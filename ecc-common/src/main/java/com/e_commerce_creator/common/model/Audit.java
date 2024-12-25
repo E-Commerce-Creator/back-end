@@ -1,6 +1,6 @@
 package com.e_commerce_creator.common.model;
 
-import com.e_commerce_creator.common.model.users.User;
+import com.e_commerce_creator.common.model.users.Account;
 import com.e_commerce_creator.common.util.SystemUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +18,7 @@ public class Audit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     String userId;
-    User user;
+    Account account;
     String takenAction;
     String responseCode;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm a", timezone = "Africa/Cairo")
@@ -31,7 +31,7 @@ public class Audit {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode tree = objectMapper.valueToTree(this);
         tree.remove("id");
-        tree.remove("user");
+        tree.remove("account");
         return SystemUtil.writeObjectAsString(tree);
     }
 

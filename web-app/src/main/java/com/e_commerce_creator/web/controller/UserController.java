@@ -1,7 +1,7 @@
 package com.e_commerce_creator.web.controller;
 
 import com.e_commerce_creator.common.enums.response.ResponseCode;
-import com.e_commerce_creator.common.model.users.User;
+import com.e_commerce_creator.common.model.users.Account;
 import com.e_commerce_creator.common.util.SystemUtil;
 import com.e_commerce_creator.web.config.security.TokenService;
 import com.e_commerce_creator.web.response.AppResponse;
@@ -29,8 +29,8 @@ public class UserController {
     ) {
         AppResponse.ResponseBuilder<JsonNode> responseBuilder = AppResponse.builder();
         try {
-            User user = tokenService.getAndValidate(token);
-            if (user == null) return responseBuilder.status(ResponseCode.UNAUTHORIZED).build().getResponseEntity();
+            Account account = tokenService.getAndValidate(token);
+            if (account == null) return responseBuilder.status(ResponseCode.UNAUTHORIZED).build().getResponseEntity();
 
             responseBuilder.data(
                     SystemUtil.convertStringToJsonNode(
