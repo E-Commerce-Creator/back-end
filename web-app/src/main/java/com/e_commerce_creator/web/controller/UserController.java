@@ -2,7 +2,7 @@ package com.e_commerce_creator.web.controller;
 
 import com.e_commerce_creator.common.enums.response.ResponseCode;
 import com.e_commerce_creator.common.model.users.Account;
-import com.e_commerce_creator.common.util.SystemUtil;
+import com.e_commerce_creator.common.util.SystemUtils;
 import com.e_commerce_creator.web.config.security.TokenService;
 import com.e_commerce_creator.web.response.AppResponse;
 import com.e_commerce_creator.web.service.users.UserService;
@@ -33,7 +33,7 @@ public class UserController {
             if (account == null) return responseBuilder.status(ResponseCode.UNAUTHORIZED).build().getResponseEntity();
 
             responseBuilder.data(
-                    SystemUtil.convertStringToJsonNode(
+                    SystemUtils.convertStringToJsonNode(
                             userService.getUser(id)
                     )
             );

@@ -1,7 +1,7 @@
 package com.e_commerce_creator.common.model;
 
 import com.e_commerce_creator.common.model.users.Account;
-import com.e_commerce_creator.common.util.SystemUtil;
+import com.e_commerce_creator.common.util.SystemUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -18,6 +18,8 @@ public class Audit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     String userId;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     Account account;
     String takenAction;
     String responseCode;
@@ -32,7 +34,7 @@ public class Audit {
         ObjectNode tree = objectMapper.valueToTree(this);
         tree.remove("id");
         tree.remove("account");
-        return SystemUtil.writeObjectAsString(tree);
+        return SystemUtils.writeObjectAsString(tree);
     }
 
 }

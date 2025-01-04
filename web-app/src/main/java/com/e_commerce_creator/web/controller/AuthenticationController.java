@@ -1,7 +1,7 @@
 package com.e_commerce_creator.web.controller;
 
 import com.e_commerce_creator.common.enums.response.ResponseCode;
-import com.e_commerce_creator.common.util.SystemUtil;
+import com.e_commerce_creator.common.util.SystemUtils;
 import com.e_commerce_creator.web.dto.request.AuthenticationRequest;
 import com.e_commerce_creator.web.dto.request.RegisterRequest;
 import com.e_commerce_creator.web.response.AppResponse;
@@ -51,7 +51,7 @@ public class AuthenticationController {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode objectNode = mapper.createObjectNode();
             objectNode.put("token", token);
-            responseBuilder.data(SystemUtil.convertStringToJsonNode(objectNode));
+            responseBuilder.data(SystemUtils.convertStringToJsonNode(objectNode));
             responseBuilder.status(ResponseCode.SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();
