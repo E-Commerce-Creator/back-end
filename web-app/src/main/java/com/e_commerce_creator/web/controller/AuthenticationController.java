@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@RequestMapping("api/v1/auth")
+@RequestMapping("api/authenticate")
 @RestController
 @RequiredArgsConstructor
 public class AuthenticationController {
@@ -43,7 +43,7 @@ public class AuthenticationController {
         return responseBuilder.build().getResponseEntity();
     }
 
-    @PostMapping("authenticate")
+    @PostMapping("login")
     public ResponseEntity<AppResponse<JsonNode>> authenticate(@RequestBody AuthenticationRequest request) {
         AppResponse.ResponseBuilder<JsonNode> responseBuilder = AppResponse.builder();
         try {

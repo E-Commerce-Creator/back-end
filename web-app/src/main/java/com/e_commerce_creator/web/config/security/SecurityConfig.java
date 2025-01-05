@@ -38,8 +38,8 @@ public class SecurityConfig {
         //do the configuration
         return httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                                .requestMatchers("/api/v1/auth/**").permitAll()
-                                .requestMatchers("/api/v1/user/**").hasAnyRole(USER.name(), ADMIN.name())
+                                .requestMatchers("/api/authenticate/**").permitAll()
+                                .requestMatchers("/api/user/**").hasAnyRole(USER.name(), ADMIN.name())
 //                                .requestMatchers(HttpMethod.GET, "api/v1/owner").hasAnyAuthority(Permission.ADMIN_READ.name(), Permission.OWNER_READ.name())
 //                                .requestMatchers(HttpMethod.POST, "api/v1/owner").hasAnyAuthority(Permission.ADMIN_CREATE.name(), Permission.OWNER_CREATE.name())
 //                                .requestMatchers(HttpMethod.PUT, "api/v1/owner").hasAnyAuthority(Permission.ADMIN_UPDATE.name(), Permission.OWNER_UPDATE.name())

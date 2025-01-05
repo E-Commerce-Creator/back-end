@@ -18,9 +18,9 @@ public class Audit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     String userId;
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    Account account;
+//    @OneToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+//    Account account;
     String takenAction;
     String responseCode;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm a", timezone = "Africa/Cairo")
