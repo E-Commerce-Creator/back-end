@@ -1,15 +1,16 @@
-package com.e_commerce_creator.common.model.users;
+package com.e_commerce_creator.common.model.account;
 
 import com.e_commerce_creator.common.enums.user.Role;
+import com.e_commerce_creator.common.model.users.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-@Entity(name = "Account")
+@Entity
+@Table(name = "accounts")
 @Getter
 @Setter
 @Builder
@@ -24,6 +25,11 @@ public class Account implements UserDetails {
     String email;
     String username;
     String password;
+    String nationalId;
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    User user;
 
     @Enumerated(EnumType.STRING)
     Role role;

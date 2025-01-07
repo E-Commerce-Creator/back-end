@@ -32,7 +32,7 @@ public class SecurityConfig {
     final LogoutService logoutService;
 
 
-    //At the application startup spring security will try to look for bean of type SecurityFilterChain
+    //At the application, startup spring security will try to look for bean of type SecurityFilterChain
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         //do the configuration
@@ -48,7 +48,6 @@ public class SecurityConfig {
                                 .authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authenticationProvider(tokenAuthenticationProvider())
                 .cors(cors -> cors.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -60,7 +59,8 @@ public class SecurityConfig {
                         return config;
                     }
                 }))
-                .addFilterBefore(authenticationFilter, BasicAuthenticationFilter.class).logout(logout -> {
+                .addFilterBefore(authenticationFilter, BasicAuthenticationFilter.class)
+                .logout(logout -> {
                     logout.logoutUrl("/api/v1/auth/logout");
                     logout.addLogoutHandler(logoutService);
                     logout.logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext());

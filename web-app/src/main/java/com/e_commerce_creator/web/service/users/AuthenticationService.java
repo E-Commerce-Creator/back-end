@@ -1,8 +1,8 @@
 package com.e_commerce_creator.web.service.users;
 
-import com.e_commerce_creator.common.model.users.Account;
-import com.e_commerce_creator.common.repository.users.UserRepository;
-import com.e_commerce_creator.web.config.security.AuthenticationFilter;
+import com.e_commerce_creator.common.model.account.Account;
+import com.e_commerce_creator.common.repository.account.AccountRepository;
+import com.e_commerce_creator.common.util.SystemUtils;
 import com.e_commerce_creator.web.config.security.TokenService;
 import com.e_commerce_creator.web.dto.request.AuthenticationRequest;
 import com.e_commerce_creator.web.dto.request.RegisterRequest;
@@ -14,14 +14,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.parsers.SAXParser;
+import java.util.List;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    final UserRepository userRepository;
-
+    static final String EMAIL_REGEX = "^[a-zA-Z0-9._]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+    static final List<String> SUPPORTED_PROVIDERS = List.of("gmail.com", "outlook.com", "yahoo.com");
+    final AccountRepository accountRepository;
     final PasswordEncoder passwordEncoder;
     final TokenService tokenService;
     final AuthenticationManager authenticationManager;
@@ -33,21 +35,26 @@ public class AuthenticationService {
                 .email(registerRequest.getEmail())
                 .username(registerRequest.getUsername())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .nationalId(registerRequest.getNationalId())
                 .role(registerRequest.getRole())
                 .build();
-        Account save = userRepository.save(account);
+        Account savedAccount = accountRepository.save(account);
 
-        return save.getId().toString();
+        return savedAccount.getId().toString();
     }
 
     @Transactional
     public String authenticate(AuthenticationRequest authenticationRequest) {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsernameOrEmail(), authenticationRequest.getPassword()));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Account account = userRepository.findAccountByUsername(authenticationRequest.getUsername()).orElseThrow(() -> new EntityNotFoundException("account not found"));
+        Account account;
+        if (Pattern.matches(EMAIL_REGEX, authenticationRequest.getUsernameOrEmail()))
+            account = accountRepository.findAccountByEmail(authenticationRequest.getUsernameOrEmail()).orElseThrow(() -> new EntityNotFoundException("account not found"));
+        else
+            account = accountRepository.findAccountByUsername(authenticationRequest.getUsernameOrEmail()).orElseThrow(() -> new EntityNotFoundException("account not found"));
         String token = tokenService.generateToken(account);
         return token;
     }

@@ -1,6 +1,5 @@
 package com.e_commerce_creator.common.model;
 
-import com.e_commerce_creator.common.model.users.Account;
 import com.e_commerce_creator.common.util.SystemUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
