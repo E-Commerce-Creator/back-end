@@ -32,14 +32,14 @@ public class SecurityConfig {
     final LogoutService logoutService;
 
 
-    //At the application startup spring security will try to look for bean of type SecurityFilterChain
+    //At the application, startup spring security will try to look for bean of type SecurityFilterChain
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         //do the configuration
         return httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                                .requestMatchers("/api/v1/auth/**").permitAll()
-                                .requestMatchers("/api/v1/user/**").hasAnyRole(USER.name(), ADMIN.name())
+                                .requestMatchers("/api/authenticate/**").permitAll()
+                                .requestMatchers("/api/user/**").hasAnyRole(USER.name(), ADMIN.name())
 //                                .requestMatchers(HttpMethod.GET, "api/v1/owner").hasAnyAuthority(Permission.ADMIN_READ.name(), Permission.OWNER_READ.name())
 //                                .requestMatchers(HttpMethod.POST, "api/v1/owner").hasAnyAuthority(Permission.ADMIN_CREATE.name(), Permission.OWNER_CREATE.name())
 //                                .requestMatchers(HttpMethod.PUT, "api/v1/owner").hasAnyAuthority(Permission.ADMIN_UPDATE.name(), Permission.OWNER_UPDATE.name())
@@ -48,7 +48,6 @@ public class SecurityConfig {
                                 .authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authenticationProvider(tokenAuthenticationProvider())
                 .cors(cors -> cors.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -60,7 +59,8 @@ public class SecurityConfig {
                         return config;
                     }
                 }))
-                .addFilterBefore(authenticationFilter, BasicAuthenticationFilter.class).logout(logout -> {
+                .addFilterBefore(authenticationFilter, BasicAuthenticationFilter.class)
+                .logout(logout -> {
                     logout.logoutUrl("/api/v1/auth/logout");
                     logout.addLogoutHandler(logoutService);
                     logout.logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext());

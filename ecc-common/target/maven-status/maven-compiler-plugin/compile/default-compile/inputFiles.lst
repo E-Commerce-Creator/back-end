@@ -1,0 +1,12 @@
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\annotations\Action.java
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\CommonApplication.java
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\config\AppConfig.java
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\enums\annotations\ActionAdditionalDetails.java
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\enums\response\ResponseCode.java
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\enums\user\Permission.java
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\enums\user\Role.java
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\exception\ECCException.java
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\model\Audit.java
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\model\users\Account.java
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\repository\users\UserRepository.java
+D:\Projects\Back-End\ecc-common\src\main\java\com\e_commerce_creator\common\util\SystemUtil.java

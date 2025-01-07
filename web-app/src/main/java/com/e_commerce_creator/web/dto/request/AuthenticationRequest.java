@@ -8,8 +8,7 @@ import lombok.Setter;
 @Getter
 @Builder
 public class AuthenticationRequest {
-    String username;
-    String email;
+    String usernameOrEmail;
     String password;
 
 }

@@ -1,8 +1,8 @@
 package com.e_commerce_creator.web.controller;
 
 import com.e_commerce_creator.common.enums.response.ResponseCode;
-import com.e_commerce_creator.common.model.users.Account;
-import com.e_commerce_creator.common.util.SystemUtil;
+import com.e_commerce_creator.common.model.account.Account;
+import com.e_commerce_creator.common.util.SystemUtils;
 import com.e_commerce_creator.web.config.security.TokenService;
 import com.e_commerce_creator.web.response.AppResponse;
 import com.e_commerce_creator.web.service.users.UserService;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("api/v1/user")
+@RequestMapping("api/users")
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -23,7 +23,7 @@ public class UserController {
     final UserService userService;
 
     @GetMapping("get/{id}")
-    public ResponseEntity<AppResponse<JsonNode>> getUser(
+    public ResponseEntity<AppResponse<JsonNode>> getUserDetails(
             @RequestHeader("X-Auth-Token") String token,
             @PathVariable Long id
     ) {
@@ -33,8 +33,8 @@ public class UserController {
             if (account == null) return responseBuilder.status(ResponseCode.UNAUTHORIZED).build().getResponseEntity();
 
             responseBuilder.data(
-                    SystemUtil.convertStringToJsonNode(
-                            userService.getUser(id)
+                    SystemUtils.convertStringToJsonNode(
+                            userService.getUserDetails(id)
                     )
             );
         } catch (Exception e) {
