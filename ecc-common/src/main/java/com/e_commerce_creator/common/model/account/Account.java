@@ -1,7 +1,9 @@
 package com.e_commerce_creator.common.model.account;
 
+import com.e_commerce_creator.common.enums.account.Gender;
 import com.e_commerce_creator.common.enums.user.Role;
 import com.e_commerce_creator.common.model.users.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,6 +28,15 @@ public class Account implements UserDetails {
     String username;
     String password;
     String nationalId;
+
+    @JsonIgnore
+    Integer age;
+    @JsonIgnore
+    String city;
+    @JsonIgnore
+    @Enumerated(EnumType.STRING)
+    Gender gender;
+
 
     @OneToOne
     @JoinColumn(name = "user_id")
