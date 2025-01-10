@@ -1,0 +1,19 @@
+# IntelliJ IDEA
+*.iml
+.idea/
+out/
+
+# Maven / Gradle
+./ecc-common/target
+./web-app/target
+
+# Logs
+*.log
+logs/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Other
+*.class
