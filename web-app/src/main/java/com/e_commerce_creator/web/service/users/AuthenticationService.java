@@ -3,11 +3,15 @@ package com.e_commerce_creator.web.service.users;
 import com.e_commerce_creator.common.enums.account.CityCode;
 import com.e_commerce_creator.common.enums.account.Gender;
 import com.e_commerce_creator.common.model.account.Account;
+import com.e_commerce_creator.common.model.users.User;
 import com.e_commerce_creator.common.repository.account.AccountRepository;
+import com.e_commerce_creator.common.repository.users.UserRepository;
 import com.e_commerce_creator.common.util.TimeUtils;
 import com.e_commerce_creator.web.config.security.TokenService;
 import com.e_commerce_creator.web.dto.request.AuthenticationRequest;
 import com.e_commerce_creator.web.dto.request.RegisterRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +31,7 @@ public class AuthenticationService {
     static final String EMAIL_REGEX = "^[a-zA-Z0-9._]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
     static final List<String> SUPPORTED_PROVIDERS = List.of("gmail.com", "outlook.com", "yahoo.com");
     final AccountRepository accountRepository;
+    final UserRepository userRepository;
     final PasswordEncoder passwordEncoder;
     final TokenService tokenService;
     final AuthenticationManager authenticationManager;
@@ -53,13 +58,23 @@ public class AuthenticationService {
                 .role(registerRequest.getRole())
                 .build();
 
-        Account savedAccount = accountRepository.save(account);
+        User user = User.builder()
+                .fullName(registerRequest.getFirstName() + " " + registerRequest.getLastName())
+                .username(registerRequest.getUsername())
+                .email(registerRequest.getEmail())
+                .nationalId(registerRequest.getNationalId())
+                .account(account)
+                .build();
 
-        return savedAccount.getId().toString();
+        account.setUser(user);//cascade persist account also with user
+
+        User savedUser = userRepository.save(user);
+
+        return savedUser.getId().toString();
     }
 
     @Transactional
-    public String authenticate(AuthenticationRequest authenticationRequest) {
+    public ObjectNode authenticate(AuthenticationRequest authenticationRequest) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsernameOrEmail(), authenticationRequest.getPassword()));
         } catch (Exception e) {
@@ -71,6 +86,9 @@ public class AuthenticationService {
         else
             account = accountRepository.findAccountByUsername(authenticationRequest.getUsernameOrEmail()).orElseThrow(() -> new EntityNotFoundException("account not found"));
         String token = tokenService.generateToken(account);
-        return token;
+        ObjectNode objectNode = new ObjectMapper().createObjectNode();
+        objectNode.put("token", token);
+        objectNode.put("username", account.getUsername());
+        return objectNode;
     }
 }
