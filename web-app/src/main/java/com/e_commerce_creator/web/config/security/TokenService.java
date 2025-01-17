@@ -22,10 +22,9 @@ import java.util.function.Function;
 
 @Service
 public class TokenService {
+    private static final long EXPIRATION_TIME = 864_000_000; // 10 days
     final Environment environment;
     final SecretKey secretKey;
-
-    private static final long EXPIRATION_TIME = 864_000_000; // 10 days
 
     @Autowired
     public TokenService(Environment environment) {

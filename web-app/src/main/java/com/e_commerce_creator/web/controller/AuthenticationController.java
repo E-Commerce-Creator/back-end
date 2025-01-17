@@ -1,6 +1,7 @@
 package com.e_commerce_creator.web.controller;
 
 import com.e_commerce_creator.common.enums.response.ResponseCode;
+import com.e_commerce_creator.common.exception.ECCException;
 import com.e_commerce_creator.common.util.SystemUtils;
 import com.e_commerce_creator.web.dto.request.AuthenticationRequest;
 import com.e_commerce_creator.web.dto.request.RegisterRequest;
@@ -33,8 +34,12 @@ public class AuthenticationController {
                     authenticationService.register(request)
             );
             responseBuilder.status(ResponseCode.SUCCESS);
+
+        } catch (ECCException e) {
+            log.error(e.getMessage());
+            responseBuilder.info("errorMessage", e.getMessage());
+            responseBuilder.status(e.getCode());
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e.getMessage());
             responseBuilder.info("errorMessage", e.getMessage());
             responseBuilder.status(ResponseCode.INTERNAL_SERVER_ERROR);
@@ -49,8 +54,11 @@ public class AuthenticationController {
             ObjectNode node = authenticationService.authenticate(request);
             responseBuilder.data(SystemUtils.convertStringToJsonNode(node));
             responseBuilder.status(ResponseCode.SUCCESS);
+        } catch (ECCException e) {
+            log.error(e.getMessage());
+            responseBuilder.info("errorMessage", e.getMessage());
+            responseBuilder.status(e.getCode());
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e.getMessage());
             responseBuilder.info("errorMessage", e.getMessage());
             responseBuilder.status(ResponseCode.INTERNAL_SERVER_ERROR);

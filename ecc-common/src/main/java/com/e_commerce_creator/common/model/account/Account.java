@@ -3,6 +3,7 @@ package com.e_commerce_creator.common.model.account;
 import com.e_commerce_creator.common.enums.account.Gender;
 import com.e_commerce_creator.common.enums.user.Role;
 import com.e_commerce_creator.common.model.users.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,7 +43,7 @@ public class Account implements UserDetails {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    @JsonIgnore
+    @JsonBackReference(value = "user-to-account")
     User user;
 
     @Enumerated(EnumType.STRING)

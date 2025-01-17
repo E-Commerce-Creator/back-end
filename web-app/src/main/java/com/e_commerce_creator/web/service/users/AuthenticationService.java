@@ -2,6 +2,8 @@ package com.e_commerce_creator.web.service.users;
 
 import com.e_commerce_creator.common.enums.account.CityCode;
 import com.e_commerce_creator.common.enums.account.Gender;
+import com.e_commerce_creator.common.enums.response.ResponseCode;
+import com.e_commerce_creator.common.exception.ECCException;
 import com.e_commerce_creator.common.model.account.Account;
 import com.e_commerce_creator.common.model.users.User;
 import com.e_commerce_creator.common.repository.account.AccountRepository;
@@ -12,16 +14,17 @@ import com.e_commerce_creator.web.dto.request.AuthenticationRequest;
 import com.e_commerce_creator.web.dto.request.RegisterRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -36,7 +39,17 @@ public class AuthenticationService {
     final TokenService tokenService;
     final AuthenticationManager authenticationManager;
 
-    public String register(RegisterRequest registerRequest) {
+    public String register(RegisterRequest registerRequest) throws ECCException {
+        Optional<User> existedUser = userRepository.findByEmail(registerRequest.getEmail());
+        if (existedUser.isPresent())
+            throw new ECCException("EMAIL_" + ResponseCode.ALREADY_EXIST.getMessage(), ResponseCode.ALREADY_EXIST);
+        existedUser = userRepository.findByUsername(registerRequest.getUsername());
+        if (existedUser.isPresent())
+            throw new ECCException("USERNAME_" + ResponseCode.ALREADY_EXIST.getMessage(), ResponseCode.ALREADY_EXIST);
+        existedUser = userRepository.findByNationalId(registerRequest.getNationalId());
+        if (existedUser.isPresent())
+            throw new ECCException("NATIONAL_ID_" + ResponseCode.ALREADY_EXIST.getMessage(), ResponseCode.ALREADY_EXIST);
+
         String nationalId = registerRequest.getNationalId();
         int year = Integer.parseInt((nationalId.charAt(0) == '2' ? "19" : "20") + nationalId.substring(1, 3));
         int month = Integer.parseInt(nationalId.substring(3, 5));
@@ -45,26 +58,9 @@ public class AuthenticationService {
         String city = CityCode.getCityNameByCode(nationalId.substring(7, 9));
         Gender gender = Integer.parseInt(nationalId.substring(9, 13)) % 2 == 0 ? Gender.FEMALE : Gender.MALE;
 
-        Account account = Account.builder()
-                .firstName(registerRequest.getFirstName())
-                .lastName(registerRequest.getLastName())
-                .email(registerRequest.getEmail())
-                .username(registerRequest.getUsername())
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .nationalId(nationalId)
-                .age(age)
-                .city(city)
-                .gender(gender)
-                .role(registerRequest.getRole())
-                .build();
+        Account account = Account.builder().firstName(registerRequest.getFirstName()).lastName(registerRequest.getLastName()).email(registerRequest.getEmail()).username(registerRequest.getUsername()).password(passwordEncoder.encode(registerRequest.getPassword())).nationalId(nationalId).age(age).city(city).gender(gender).role(registerRequest.getRole()).build();
 
-        User user = User.builder()
-                .fullName(registerRequest.getFirstName() + " " + registerRequest.getLastName())
-                .username(registerRequest.getUsername())
-                .email(registerRequest.getEmail())
-                .nationalId(registerRequest.getNationalId())
-                .account(account)
-                .build();
+        User user = User.builder().fullName(registerRequest.getFirstName() + " " + registerRequest.getLastName()).username(registerRequest.getUsername()).email(registerRequest.getEmail()).nationalId(registerRequest.getNationalId()).account(account).build();
 
         account.setUser(user);//cascade persist account also with user
 
@@ -74,17 +70,18 @@ public class AuthenticationService {
     }
 
     @Transactional
-    public ObjectNode authenticate(AuthenticationRequest authenticationRequest) {
+    public ObjectNode authenticate(AuthenticationRequest authenticationRequest) throws ECCException {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsernameOrEmail(), authenticationRequest.getPassword()));
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (AuthenticationException e) {
+            throw new ECCException(ResponseCode.INVALID_AUTH.getMessage(), ResponseCode.INVALID_AUTH);
         }
+
         Account account;
         if (Pattern.matches(EMAIL_REGEX, authenticationRequest.getUsernameOrEmail()))
-            account = accountRepository.findAccountByEmail(authenticationRequest.getUsernameOrEmail()).orElseThrow(() -> new EntityNotFoundException("account not found"));
+            account = accountRepository.findAccountByEmail(authenticationRequest.getUsernameOrEmail()).orElseThrow(() -> new ECCException("account not found", ResponseCode.NOT_FOUND));
         else
-            account = accountRepository.findAccountByUsername(authenticationRequest.getUsernameOrEmail()).orElseThrow(() -> new EntityNotFoundException("account not found"));
+            account = accountRepository.findAccountByUsername(authenticationRequest.getUsernameOrEmail()).orElseThrow(() -> new ECCException("account not found", ResponseCode.NOT_FOUND));
         String token = tokenService.generateToken(account);
         ObjectNode objectNode = new ObjectMapper().createObjectNode();
         objectNode.put("token", token);
