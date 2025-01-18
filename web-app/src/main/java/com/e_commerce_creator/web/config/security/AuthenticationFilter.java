@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -28,12 +28,10 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //any issue on spring security start to debug from AuthenticationFilter.doFilterInternal
-        //prepare the Bearer token that are sent with request on authorization http header
-        final String authHeader = request.getHeader("X-Auth-Token");
-        final String token;
+        //prepare the Bearer token that is sent with request on authorization http header
+        final String token = request.getHeader("X-Auth-Token");
         final Account account;
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
+        if (token != null && !token.isEmpty()) {
             //extract the account using Jwt token from JwtService;
             try {
                 account = tokenService.extractAccount(token);

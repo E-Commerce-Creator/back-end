@@ -14,15 +14,17 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 @Service
 public class TokenService {
+    private static final long EXPIRATION_TIME = 864_000_000; // 10 days
     final Environment environment;
     final SecretKey secretKey;
-
-    private static final long EXPIRATION_TIME = 864_000_000; // 10 days
 
     @Autowired
     public TokenService(Environment environment) {
@@ -127,7 +129,7 @@ public class TokenService {
     }
 
     public Account getAndValidate(String token) {
-        if (token.startsWith("Bearer ")) token = token.substring(7);
+//        if (token.startsWith("Bearer ")) token = token.substring(7);
         Account account = extractAccount(token);
         return isTokenValid(token, account) ? account : null;
     }

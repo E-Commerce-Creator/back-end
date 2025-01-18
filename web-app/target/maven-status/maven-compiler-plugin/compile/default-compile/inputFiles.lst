@@ -12,6 +12,7 @@ D:\Projects\Back-End\web-app\src\main\java\com\e_commerce_creator\web\dto\reques
 D:\Projects\Back-End\web-app\src\main\java\com\e_commerce_creator\web\dto\response\AuthenticationResponse.java
 D:\Projects\Back-End\web-app\src\main\java\com\e_commerce_creator\web\response\AppResponse.java
 D:\Projects\Back-End\web-app\src\main\java\com\e_commerce_creator\web\response\Error.java
+D:\Projects\Back-End\web-app\src\main\java\com\e_commerce_creator\web\service\account\AccountService.java
 D:\Projects\Back-End\web-app\src\main\java\com\e_commerce_creator\web\service\users\AuthenticationService.java
 D:\Projects\Back-End\web-app\src\main\java\com\e_commerce_creator\web\service\users\UserService.java
 D:\Projects\Back-End\web-app\src\main\java\com\e_commerce_creator\web\WebApplication.java

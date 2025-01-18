@@ -1,13 +1,13 @@
 package com.e_commerce_creator.web.controller;
 
 import com.e_commerce_creator.common.enums.response.ResponseCode;
+import com.e_commerce_creator.common.exception.ECCException;
 import com.e_commerce_creator.common.util.SystemUtils;
 import com.e_commerce_creator.web.dto.request.AuthenticationRequest;
 import com.e_commerce_creator.web.dto.request.RegisterRequest;
 import com.e_commerce_creator.web.response.AppResponse;
 import com.e_commerce_creator.web.service.users.AuthenticationService;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,8 +34,12 @@ public class AuthenticationController {
                     authenticationService.register(request)
             );
             responseBuilder.status(ResponseCode.SUCCESS);
+
+        } catch (ECCException e) {
+            log.error(e.getMessage());
+            responseBuilder.info("errorMessage", e.getMessage());
+            responseBuilder.status(e.getCode());
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e.getMessage());
             responseBuilder.info("errorMessage", e.getMessage());
             responseBuilder.status(ResponseCode.INTERNAL_SERVER_ERROR);
@@ -47,14 +51,14 @@ public class AuthenticationController {
     public ResponseEntity<AppResponse<JsonNode>> authenticate(@RequestBody AuthenticationRequest request) {
         AppResponse.ResponseBuilder<JsonNode> responseBuilder = AppResponse.builder();
         try {
-            String token = authenticationService.authenticate(request);
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectNode objectNode = mapper.createObjectNode();
-            objectNode.put("token", token);
-            responseBuilder.data(SystemUtils.convertStringToJsonNode(objectNode));
+            ObjectNode node = authenticationService.authenticate(request);
+            responseBuilder.data(SystemUtils.convertStringToJsonNode(node));
             responseBuilder.status(ResponseCode.SUCCESS);
+        } catch (ECCException e) {
+            log.error(e.getMessage());
+            responseBuilder.info("errorMessage", e.getMessage());
+            responseBuilder.status(e.getCode());
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e.getMessage());
             responseBuilder.info("errorMessage", e.getMessage());
             responseBuilder.status(ResponseCode.INTERNAL_SERVER_ERROR);

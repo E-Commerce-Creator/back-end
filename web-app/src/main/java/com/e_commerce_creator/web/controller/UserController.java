@@ -2,6 +2,7 @@ package com.e_commerce_creator.web.controller;
 
 import com.e_commerce_creator.common.enums.response.ResponseCode;
 import com.e_commerce_creator.common.model.account.Account;
+import com.e_commerce_creator.common.repository.users.UserRepository;
 import com.e_commerce_creator.common.util.SystemUtils;
 import com.e_commerce_creator.web.config.security.TokenService;
 import com.e_commerce_creator.web.response.AppResponse;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RequestMapping("api/users")
+@RequestMapping("api/user")
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -22,10 +23,11 @@ public class UserController {
 
     final UserService userService;
 
-    @GetMapping("get/{id}")
+    final UserRepository userRepository;
+
+    @GetMapping("details")
     public ResponseEntity<AppResponse<JsonNode>> getUserDetails(
-            @RequestHeader("X-Auth-Token") String token,
-            @PathVariable Long id
+            @RequestHeader("X-Auth-Token") String token
     ) {
         AppResponse.ResponseBuilder<JsonNode> responseBuilder = AppResponse.builder();
         try {
@@ -34,7 +36,7 @@ public class UserController {
 
             responseBuilder.data(
                     SystemUtils.convertStringToJsonNode(
-                            userService.getUserDetails(id)
+                            userService.getUserDetails(account)
                     )
             );
         } catch (Exception e) {
