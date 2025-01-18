@@ -9,6 +9,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -28,6 +30,10 @@ public class UserService {
         basicDetail.put("email", user.getEmail());
         basicDetail.put("fullName", user.getFullName());
         basicDetail.put("nationalId", user.getNationalId());
+        ObjectNode roleNode = mapper.createObjectNode();
+        roleNode.putPOJO("role", user.getAccount().getRole());
+        roleNode.putPOJO("permission", Set.of(user.getAccount().getRole().getPermissions()));
+        basicDetail.putPOJO("role", roleNode);
 
         node.putPOJO("details", basicDetail);
         return node;
