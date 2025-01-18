@@ -2,6 +2,9 @@ package com.e_commerce_creator.common.exception;
 
 import com.e_commerce_creator.common.enums.response.ResponseCode;
 
+/**
+ * Define Global Exception relate to ECC
+ */
 public class ECCException extends Exception {
     ResponseCode responseCode;
 

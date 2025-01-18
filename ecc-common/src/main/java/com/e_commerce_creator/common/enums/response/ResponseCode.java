@@ -3,8 +3,7 @@ package com.e_commerce_creator.common.enums.response;
 import org.springframework.http.HttpStatus;
 
 /**
- * Define HTTP Status Codes In 100:149, 200:249, 300:349, 400:449, 500:549
- * Define Customs Status Codes In 150:199, 250:299, 350:399, 450:499, 550:599
+ * Define HTTP Status Codes
  */
 public enum ResponseCode {
     /**

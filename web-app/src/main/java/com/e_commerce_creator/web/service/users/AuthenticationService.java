@@ -40,15 +40,10 @@ public class AuthenticationService {
     final AuthenticationManager authenticationManager;
 
     public String register(RegisterRequest registerRequest) throws ECCException {
-        Optional<User> existedUser = userRepository.findByEmail(registerRequest.getEmail());
-        if (existedUser.isPresent())
-            throw new ECCException("EMAIL_" + ResponseCode.ALREADY_EXIST.getMessage(), ResponseCode.ALREADY_EXIST);
-        existedUser = userRepository.findByUsername(registerRequest.getUsername());
-        if (existedUser.isPresent())
-            throw new ECCException("USERNAME_" + ResponseCode.ALREADY_EXIST.getMessage(), ResponseCode.ALREADY_EXIST);
-        existedUser = userRepository.findByNationalId(registerRequest.getNationalId());
-        if (existedUser.isPresent())
-            throw new ECCException("NATIONAL_ID_" + ResponseCode.ALREADY_EXIST.getMessage(), ResponseCode.ALREADY_EXIST);
+        Optional<String> conflictField = userRepository.findConflictField(registerRequest.getUsername(), registerRequest.getEmail(), registerRequest.getNationalId());
+        if (conflictField.isPresent()) {
+            throw new ECCException(conflictField.get() + "_" + ResponseCode.ALREADY_EXIST.getMessage(), ResponseCode.ALREADY_EXIST);
+        }
 
         String nationalId = registerRequest.getNationalId();
         int year = Integer.parseInt((nationalId.charAt(0) == '2' ? "19" : "20") + nationalId.substring(1, 3));
