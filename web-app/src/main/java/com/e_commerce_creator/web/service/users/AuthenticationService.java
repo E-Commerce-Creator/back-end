@@ -18,21 +18,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
 
     static final String EMAIL_REGEX = "^[a-zA-Z0-9._]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-    static final List<String> SUPPORTED_PROVIDERS = List.of("gmail.com", "outlook.com", "yahoo.com");
     final AccountRepository accountRepository;
     final UserRepository userRepository;
     final PasswordEncoder passwordEncoder;
@@ -53,7 +53,19 @@ public class AuthenticationService {
         String city = CityCode.getCityNameByCode(nationalId.substring(7, 9));
         Gender gender = Integer.parseInt(nationalId.substring(9, 13)) % 2 == 0 ? Gender.FEMALE : Gender.MALE;
 
-        Account account = Account.builder().firstName(registerRequest.getFirstName()).lastName(registerRequest.getLastName()).email(registerRequest.getEmail()).username(registerRequest.getUsername()).password(passwordEncoder.encode(registerRequest.getPassword())).nationalId(nationalId).age(age).city(city).gender(gender).role(registerRequest.getRole()).build();
+        String permissions = registerRequest.getRole().getAuthorities().stream().map(SimpleGrantedAuthority::getAuthority).collect(Collectors.joining(","));
+        Account account = Account.builder()
+                .firstName(registerRequest.getFirstName())
+                .lastName(registerRequest.getLastName())
+                .email(registerRequest.getEmail())
+                .username(registerRequest.getUsername())
+                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .nationalId(nationalId)
+                .age(age)
+                .city(city)
+                .gender(gender)
+                .role(registerRequest.getRole())
+                .permissions(permissions).build();
 
         User user = User.builder().fullName(registerRequest.getFirstName() + " " + registerRequest.getLastName()).username(registerRequest.getUsername()).email(registerRequest.getEmail()).nationalId(registerRequest.getNationalId()).account(account).build();
 

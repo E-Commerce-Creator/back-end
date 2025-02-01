@@ -12,16 +12,12 @@ import static com.e_commerce_creator.common.enums.user.Permission.*;
 
 public enum Role {
     USER(Collections.emptySet()),
-    ADMIN(
+    WORKER(
             Set.of(
-                    ADMIN_READ,
-                    ADMIN_UPDATE,
-                    ADMIN_DELETE,
-                    ADMIN_CREATE,
-                    OWNER_READ,
-                    OWNER_UPDATE,
-                    OWNER_DELETE,
-                    OWNER_CREATE
+                    WORKER_READ,
+                    WORKER_UPDATE,
+                    WORKER_DELETE,
+                    WORKER_CREATE
             )
     ),
     OWNER(
@@ -30,6 +26,14 @@ public enum Role {
                     OWNER_UPDATE,
                     OWNER_DELETE,
                     OWNER_CREATE
+            )
+    ),
+    ADMIN(
+            Set.of(
+                    ADMIN_READ,
+                    ADMIN_UPDATE,
+                    ADMIN_DELETE,
+                    ADMIN_CREATE
             )
     );
 

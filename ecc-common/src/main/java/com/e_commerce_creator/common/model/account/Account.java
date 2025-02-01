@@ -49,6 +49,9 @@ public class Account implements UserDetails {
     @Enumerated(EnumType.STRING)
     Role role;
 
+    @Column(name = "permissions")
+    String permissions;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
