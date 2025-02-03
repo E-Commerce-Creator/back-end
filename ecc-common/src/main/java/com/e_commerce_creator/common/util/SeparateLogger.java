@@ -9,8 +9,12 @@ import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import ch.qos.logback.core.util.FileSize;
 import org.slf4j.LoggerFactory;
 
-public class DynamicLogger {
+public class SeparateLogger {
     public static org.slf4j.Logger addDynamicAppender(String jobName) {
+        return addDynamicAppender(jobName, false);
+    }
+
+    public static org.slf4j.Logger addDynamicAppender(String jobName, boolean hideLogsFromConsole) {
 //        Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
@@ -37,7 +41,7 @@ public class DynamicLogger {
         // Configure Encoder
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
-        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n");
+        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %C : %M line-%L - %msg%n");
         encoder.start();
 
         // Set the encoder for the appender
@@ -49,5 +53,16 @@ public class DynamicLogger {
         logger.addAppender(rollingFileAppender);
         logger.setAdditive(false);
         return LoggerFactory.getLogger(jobName);
+    }
+
+    public static String getStackTraceLogger(Exception e, Class<?> _class) {
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement element : e.getStackTrace()) {
+            sb.append(element).append(System.lineSeparator());
+            if (element.getClassName().equals(_class.getName())) {
+                break;
+            }
+        }
+        return sb.toString();
     }
 }
