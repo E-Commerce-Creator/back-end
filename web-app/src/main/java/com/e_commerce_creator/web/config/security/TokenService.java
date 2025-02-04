@@ -1,6 +1,7 @@
 package com.e_commerce_creator.web.config.security;
 
 import com.e_commerce_creator.common.model.account.Account;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -104,7 +104,7 @@ public class TokenService {
 
     public String generateToken(ObjectNode extraClaims, Account account) {
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, ?> mappedClaims = mapper.convertValue(extraClaims, HashMap.class);
+        Map<String, Object> mappedClaims = mapper.convertValue(extraClaims, new TypeReference<>() {});
         return Jwts.builder()
                 .claims(mappedClaims)
                 .subject(account.getUsername())
