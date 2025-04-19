@@ -65,15 +65,6 @@ public class TokenService {
         objectNode.remove("iat");
         objectNode.remove("exp");
         objectNode.remove("authorities");
-//        List<String> permissions = new ArrayList<>();
-//        if (objectNode.get("authorities").isArray()) {
-//            ArrayNode arrayNode = (ArrayNode) objectNode.get("authorities");
-//            permissions = mapper.convertValue(arrayNode, ArrayList.class);
-//        }
-//        List<SimpleGrantedAuthority> authorities = permissions.stream().map(SimpleGrantedAuthority::new).toList();
-//        ArrayNode arrayNode = mapper.createArrayNode();
-//        authorities.forEach(authority -> arrayNode.add(mapper.convertValue(authority, JsonNode.class)));
-//        objectNode.set("authorities", arrayNode);
         return objectNode;
     }
 

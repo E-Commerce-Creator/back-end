@@ -3,6 +3,8 @@ package com.e_commerce_creator.common.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.persistence.TypedQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
@@ -11,6 +13,8 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -108,6 +112,30 @@ public class SystemUtils {
 
     public static Pageable createSortOnlyPageable(String sortBy, Sort.Direction direction) {
         return PageRequest.of(0, Integer.MAX_VALUE, Sort.by(direction, sortBy));
+    }
+
+    public static JsonNode getCurrentUserDetailsInJson() {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode node = mapper.createObjectNode();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        node.set("principal", mapper.valueToTree(authentication.getPrincipal()));
+        node.set("authorities", mapper.valueToTree(authentication.getAuthorities()));
+//        node.set("authorities", mapper.valueToTree(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList())));
+        node.put("credentials", String.valueOf(authentication.getCredentials()));
+        return node;
+    }
+
+    public static TypedQuery setQueryParameters(TypedQuery query, Map<String, Object> parameters) {
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof List) {
+                query.setParameter(key, (List<?>) value);
+            } else {
+                query.setParameter(key, value);
+            }
+        }
+        return query;
     }
 
 }

@@ -8,15 +8,18 @@ import com.e_commerce_creator.common.model.account.Account;
 import com.e_commerce_creator.common.model.users.User;
 import com.e_commerce_creator.common.repository.account.AccountRepository;
 import com.e_commerce_creator.common.repository.users.UserRepository;
+import com.e_commerce_creator.common.util.SystemUtils;
 import com.e_commerce_creator.common.util.TimeUtils;
 import com.e_commerce_creator.web.config.security.TokenService;
 import com.e_commerce_creator.web.dto.request.AuthenticationRequest;
 import com.e_commerce_creator.web.dto.request.RegisterRequest;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -53,9 +56,26 @@ public class AuthenticationService {
         String city = CityCode.getCityNameByCode(nationalId.substring(7, 9));
         Gender gender = Integer.parseInt(nationalId.substring(9, 13)) % 2 == 0 ? Gender.FEMALE : Gender.MALE;
 
-        Account account = Account.builder().firstName(registerRequest.getFirstName()).lastName(registerRequest.getLastName()).email(registerRequest.getEmail()).username(registerRequest.getUsername()).password(passwordEncoder.encode(registerRequest.getPassword())).nationalId(nationalId).age(age).city(city).gender(gender).role(registerRequest.getRole()).build();
+        Account account = Account.builder()
+                .firstName(registerRequest.getFirstName())
+                .lastName(registerRequest.getLastName())
+                .email(registerRequest.getEmail())
+                .username(registerRequest.getUsername())
+                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .nationalId(nationalId)
+                .age(age)
+                .city(city)
+                .gender(gender)
+                .role(registerRequest.getRole())
+                .build();
 
-        User user = User.builder().fullName(registerRequest.getFirstName() + " " + registerRequest.getLastName()).username(registerRequest.getUsername()).email(registerRequest.getEmail()).nationalId(registerRequest.getNationalId()).account(account).build();
+        User user = User.builder()
+                .fullName(registerRequest.getFirstName() + " " + registerRequest.getLastName())
+                .username(registerRequest.getUsername())
+                .email(registerRequest.getEmail())
+                .nationalId(registerRequest.getNationalId())
+                .account(account)
+                .build();
 
         account.setUser(user);//cascade persist account also with user
 

@@ -38,12 +38,8 @@ public class AspectConfig {
             Object object = null; // before
             try {
                 startTime = System.currentTimeMillis();
-                if (!joinPoint.getSignature().getName().equals("login")) {
-                    log.info(
-                            "Invoked: {}",
-                            niceName(joinPoint)
-                    );
-                } else {
+                //exclude logging endpoint for privacy
+                if (!joinPoint.getSignature().getName().equals("authenticate")) {
                     log.info(
                             "Invoked: {}",
                             niceName(joinPoint)
@@ -51,12 +47,6 @@ public class AspectConfig {
                 }
                 object = joinPoint.proceed();
 
-                try {
-                    log.info("LOG: CALL CREATE AUDIT.");
-                    log.info("LOG: AFTER CALL CREATE AUDIT.");
-                } catch (Exception exception) {
-                    log.error("Couldn't Add Audit Record");
-                }
 
                 endTime = System.currentTimeMillis();
             } finally {
@@ -78,26 +68,5 @@ public class AspectConfig {
             List<String> classPath = Arrays.asList(joinPoint.getTarget().getClass().getName().split("\\."));
             return classPath.get(classPath.size() - 1) + "#" + joinPoint.getSignature().getName();
         }
-
-    }
-
-
-    /**
-     * <h1><b>Aspect for intercept any repository call</b></h1>
-     */
-    @Aspect
-    @Component
-    public static class RepositoryInterceptor {
-
-//        @Around("execution(* org.springframework.data.repository.Repository+.*(..))")
-//        public Object inWebLayer(ProceedingJoinPoint joinPoint) throws Throwable {
-//            Object object = null; // before
-//            try {
-//                object = joinPoint.proceed();
-//            } finally {
-//
-//            }
-//            return joinPoint.proceed();
-//        }
     }
 }
